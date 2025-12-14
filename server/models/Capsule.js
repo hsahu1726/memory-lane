@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const CapsuleSchema = new mongoose.Schema({
+  creatorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User' // Links this ID to the new 'User' model
+    },
   title: { type: String, required: true },
   message: { type: String, required: true },
   unlockDate: { type: Date, required: true },
@@ -18,12 +23,14 @@ const CapsuleSchema = new mongoose.Schema({
         default: 'General'
     },
 
-    contributors: {
-        type: String, // Store names/emails as a comma-separated string
-        default: 'Creator Only'
-    },
+  contributors: {
+      type: String, // Store names/emails as a comma-separated string
+      default: 'Creator Only'
+  },
 
   createdAt: { type: Date, default: Date.now }
+
+  
 });
 
 module.exports = mongoose.model('Capsule', CapsuleSchema);
