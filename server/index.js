@@ -129,11 +129,16 @@ const nodemailer = require("nodemailer");
 
 // 1. SETUP EMAIL TRANSPORTER (Use Gmail for Hackathons)
 const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "hsahu1726.com", // Put your real email
-    pass: "lskm iywq laga fyph",     // You need an App Password (not your normal password)
-  },
+    // Use SendGrid's SMTP configuration
+    host: "smtp.sendgrid.net", 
+    port: 587,
+    secure: false, // Use STARTTLS encryption
+    auth: {
+        // The username for API keys is always 'apikey'
+        user: 'apikey', 
+        // Read the secret key from your .env file
+        pass: process.env.SENDGRID_API_KEY, 
+    },
 });
 
 // 2. THE CRON JOB (Runs every minute)
