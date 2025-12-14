@@ -195,7 +195,6 @@ app.post("/api/capsules", auth, upload.single("file"), async (req, res) => { // 
 });
 
 // ---------------- AI ROUTE (Gemini) ----------------
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 
 app.post("/api/ai-polish", async (req, res) => {
