@@ -137,10 +137,12 @@ export default function CreatePage() {
                     <select className="w-full bg-[#161b22] border border-gray-700 text-gray-400 p-2 rounded focus:border-amber-500"
                         onChange={(e) => setFormData({...formData, eventType: e.target.value})}>
                         <option value="None">No Event (Use Date)</option>
-                        <option value="Graduation">🎓 Graduation</option>
-                        <option value="Wedding">💍 Wedding</option>
-                        <option value="18th Birthday">🎂 18th Birthday</option>
-                        <option value="First Job">💼 First Job</option>
+                        <option value="Graduation"> Graduation</option>
+                        <option value="Wedding"> Wedding</option>
+                        <option value="18th Birthday"> 18th Birthday</option>
+                        <option value="First Job"> First Job</option>
+                        <option value="Travel"> Travel</option>
+                        <option value="Milestone"> Milestone</option>
                     </select>
                 </div>
              </div>
