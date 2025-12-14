@@ -189,4 +189,42 @@ cron.schedule("* * * * *", async () => {
     console.error("Cron Error:", err);
   }
 });
+
+// --- In server/index.js (Auth Routes) ---
+const jwt = require('jsonwebtoken');
+const User = require('./models/User'); // Import the new model
+
+// --- REGISTRATION ---
+app.post('/api/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.create({ email, password });
+        res.status(201).json({ message: 'User registered successfully.' });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Email already in use.' });
+        }
+        res.status(500).json({ message: 'Server error during registration.' });
+    }
+});
+
+// --- LOGIN ---
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user || !(await user.comparePassword(password))) {
+            return res.status(401).json({ message: 'Invalid email or password.' });
+        }
+
+        // Generate JWT Token
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
+        // Send token to the client (often set as a cookie in production)
+        res.json({ message: 'Login successful', token, userId: user._id });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error during login.' });
+    }
+});
 app.listen(PORT, () => console.log(`Server sailing on port ${PORT}`));
