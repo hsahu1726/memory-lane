@@ -20,7 +20,17 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* The path must start with a forward slash */
+  background-image: url('/background.jpeg');
+  
+  /* Fallback color: If you see RED, the image link is broken */
+  background-color: darkred;
+
+  /* Locking the image in place */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  
+  color: #fff;
 }
