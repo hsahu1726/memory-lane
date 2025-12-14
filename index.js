@@ -1,6 +1,20 @@
 require("dotenv").config();
-const { GoogleGenAI } = require('@google/genai');
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let genAIClient;
+async function initGenAI() {
+  const { GoogleGenAI } = await import("@google/genai");
+
+  genAIClient = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+  });
+
+  console.log("✅ Gemini AI initialized");
+}
+
+// Initialize once at startup
+initGenAI().catch(err => {
+  console.error("❌ Failed to initialize Gemini AI:", err);
+});
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -14,7 +28,8 @@ const User = require('./models/User'); // User model is now required
 const auth = require('./middleware/auth'); // NEW: JWT verification middleware
 
 // --- CONFIG ---
-const UPLOADS_PATH = 'C:\\Users\\hp\\OneDrive\\Desktop\\MemoryLane\\memory-lane\\server\\uploads';
+const path = require("path");
+const UPLOADS_PATH = path.join(__dirname, "uploads");
 
 const app = express();
 app.use(cors());
@@ -184,25 +199,35 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 
 app.post("/api/ai-polish", async (req, res) => {
-  const { text, mode } = req.body;
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
-    
-    let prompt = "";
-    if (mode === "pirate") prompt = `Rewrite this as a 17th century pirate: "${text}"`;
-    else if (mode === "poetic") prompt = `Rewrite this as a heartwarming nostalgic poem: "${text}"`;
-    else prompt = `Fix grammar and make this memory sound more emotional and vivid: "${text}"`;
+  const { text, mode } = req.body;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const polishedText = response.text();
-    
-    res.json({ polishedText });
-  } catch (error) {
-    console.error("AI Error:", error);
-    res.status(500).json({ error: "AI fell overboard!" });
-  }
+  if (!genAIClient) {
+    return res.status(503).json({ error: "AI not initialized yet" });
+  }
+
+  try {
+    let prompt = "";
+
+    if (mode === "pirate") {
+      prompt = `Rewrite this as a 17th century pirate: "${text}"`;
+    } else if (mode === "poetic") {
+      prompt = `Rewrite this as a heartwarming nostalgic poem: "${text}"`;
+    } else {
+      prompt = `Fix grammar and make this memory sound more emotional and vivid: "${text}"`;
+    }
+
+    const response = await genAIClient.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+
+    res.json({ polishedText: response.text });
+  } catch (error) {
+    console.error("AI Error:", error);
+    res.status(500).json({ error: "AI processing failed" });
+  }
 });
+
 
 // ---------------- CRON JOB (Same as before) ----------------
 const transporter = nodemailer.createTransport({
