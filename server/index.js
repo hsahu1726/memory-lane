@@ -237,4 +237,47 @@ cron.schedule("* * * * *", async () => {
 });
 
 const PORT = 5000;
+
+// --- In server/index.js (After Capsule routes) ---
+
+const Comment = require('./models/Comment'); // Import the new model
+
+// 1. POST: Submit a new comment to an unlocked capsule (PROTECTED)
+app.post('/api/capsules/:id/comments', auth, async (req, res) => {
+    try {
+        const capsuleId = req.params.id;
+        const { content, creatorName } = req.body;
+
+        // Optional: Check if the capsule is UNLOCKED before allowing comment
+        const capsule = await Capsule.findById(capsuleId);
+        if (!capsule || capsule.status !== 'UNLOCKED') {
+            return res.status(403).json({ message: 'Capsule is locked. No interaction allowed yet.' });
+        }
+        
+        const newComment = new Comment({
+            capsuleId,
+            creatorId: req.userId,
+            creatorName, // Comes from the client side (stored in localStorage)
+            content,
+        });
+
+        await newComment.save();
+        res.status(201).json(newComment);
+    } catch (error) {
+        console.error('Error submitting comment:', error);
+        res.status(500).json({ message: 'Failed to submit comment.' });
+    }
+});
+
+// 2. GET: Fetch all comments for a specific capsule
+app.get('/api/capsules/:id/comments', async (req, res) => {
+    try {
+        const capsuleId = req.params.id;
+        // Fetch comments and sort them by creation date
+        const comments = await Comment.find({ capsuleId }).sort({ createdAt: 1 });
+        res.status(200).json(comments);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch comments.' });
+    }
+});
 app.listen(PORT, () => console.log(`Server sailing on port ${PORT}`));
