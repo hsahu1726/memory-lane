@@ -76,16 +76,20 @@ const upload = multer({ storage });
 
 // --- REGISTRATION ---
 app.post('/api/register', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.create({ email, password });
-        res.status(201).json({ message: 'User registered successfully.' });
-    } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Email already in use.' });
-        }
-        res.status(500).json({ message: 'Server error during registration.' });
-    }
+    try {
+        // PULL NAME FROM REQUEST BODY
+        const { email, password, name } = req.body; 
+        
+        // PASS NAME TO CREATE FUNCTION
+        const user = await User.create({ email, password, name });
+        
+        res.status(201).json({ message: 'User registered successfully.' });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Email already in use.' });
+        }
+        res.status(500).json({ message: 'Server error during registration.' });
+    }
 });
 
 // --- LOGIN ---

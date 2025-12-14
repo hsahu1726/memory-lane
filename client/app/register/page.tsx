@@ -2,12 +2,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaUserPlus, FaAnchor, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaUserPlus, FaAnchor, FaEnvelope, FaLock, FaUserCircle } from "react-icons/fa"; // Added FaUserCircle for the name input
 import axios from "axios";
 
 export default function RegisterPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    
+    // NEW STATE FOR NAME
+    const [name, setName] = useState("");
+    
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -18,12 +22,14 @@ export default function RegisterPage() {
         setLoading(true);
 
         try {
+            // UPDATED: Pass the 'name' state to the backend
             const res = await axios.post("http://localhost:5000/api/register", {
+                name, // CRITICAL: Send the user's name
                 email,
                 password,
             });
 
-            alert("Success! You are registered. Now log in, Captain.");
+            alert(`Welcome aboard, ${name}! You are registered. Now log in, Captain.`);
             router.push("/login"); // Redirect to login after successful registration
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || "Registration failed. Try again.";
@@ -50,6 +56,20 @@ export default function RegisterPage() {
                 </h2>
 
                 <form onSubmit={handleRegister} className="space-y-6">
+                    
+                    {/* NEW PIRATE NAME INPUT FIELD */}
+                    <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Your Pirate Name</label>
+                        <div className="relative">
+                            <FaUserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
+                            <input type="text" required className="w-full bg-[#0d1117] border border-gray-700 text-amber-100 p-3 pl-10 rounded focus:border-amber-500 focus:outline-none"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)} 
+                                placeholder="Captain Redbeard" />
+                        </div>
+                    </div>
+                    {/* END NEW PIRATE NAME INPUT FIELD */}
+                    
                     <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Email (Your Ship Name)</label>
                         <div className="relative">
