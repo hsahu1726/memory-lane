@@ -10,16 +10,39 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchCapsules = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/capsules");
-        setCapsules(res.data);
-      } catch (error) {
-        console.error("Error fetching treasures:", error);
-      }
-    };
-    fetchCapsules();
-  }, []);
+    const fetchCapsules = async () => {
+      // 1. CRITICAL: Retrieve the JWT token
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.warn("User not logged in. Cannot fetch personalized map.");
+        // You might want to redirect to login here if you want to enforce auth on the homepage
+        // router.push('/login'); 
+        setCapsules([]); // Clear any old data
+        return;
+      }
+
+      try {
+        // 2. Send the token in the Authorization header
+        const res = await axios.get("http://localhost:5000/api/capsules", {
+          headers: {
+            'Authorization': `Bearer ${token}` 
+          }
+        });
+        setCapsules(res.data);
+      } catch (error: any) {
+        // If the token is invalid or expired, the server will return 401
+        if (error.response && error.response.status === 401) {
+            console.error("Session expired or invalid token. Redirecting to login.");
+            localStorage.removeItem('authToken'); // Clean up bad token
+            // router.push('/login'); // Uncomment if using useRouter
+        } else {
+            console.error("Error fetching treasures:", error);
+        }
+      }
+    };
+    fetchCapsules();
+  }, []);
 
   // Filter Logic
   const filteredCapsules = capsules.filter((c: any) =>

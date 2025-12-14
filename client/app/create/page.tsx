@@ -40,9 +40,21 @@ export default function CreatePage() {
   };
 
   // 📨 FORM SUBMIT (Handles Image + Data)
-  const handleSubmit = async (e: React.FormEvent) => {
+  // --- In client/app/create/page.tsx (Replace handleSubmit) ---
+
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const token = localStorage.getItem('authToken');
+
+    // 1. ENFORCE LOGIN AND REDIRECT
+    if (!token) {
+        alert("You must be logged in to seal a new treasure.");
+        setLoading(false);
+        // Ensure you have `const router = useRouter();` imported at the top
+        return router.push("/login"); 
+    }
 
     // We must use FormData for file uploads
     const data = new FormData();
@@ -56,16 +68,29 @@ export default function CreatePage() {
     if (file) data.append("file", file);
 
     try {
-      await axios.post("http://localhost:5000/api/capsules", data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      router.push("/");
-    } catch (error) {
-      alert("Arrgh! Server rejected the treasure.");
+        await axios.post("http://localhost:5000/api/capsules", data, {
+            headers: { 
+                "Content-Type": "multipart/form-data",
+                // 2. CRITICAL: Attach the JWT token for authentication
+                "Authorization": `Bearer ${token}` 
+            },
+        });
+        router.push("/");
+    } catch (error: any) {
+        // Handle server errors (e.g., 401 Unauthorized if the token expired)
+        console.error("Creation Error:", error);
+        alert(`Arrgh! Server rejected the treasure. ${error.response?.data?.message || ""}`);
+        
+        // Optional: If creation fails due to a bad token, redirect to login
+        if (error.response?.status === 401) {
+             localStorage.removeItem('authToken');
+             router.push("/login"); 
+        }
+
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <div className="min-h-screen bg-black/60 backdrop-blur-sm text-amber-100 p-6 flex justify-center items-center font-serif">
