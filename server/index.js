@@ -115,14 +115,35 @@ app.post('/api/login', async (req, res) => {
 // ---------------- PROTECTED CAPSULE ROUTES ----------------
 
 // GET ALL (PROTECTED) - Now only fetches capsules for the logged-in user
-app.get("/api/capsules", auth, async (req, res) => { // ADDED 'auth' middleware
-  try {
-    // CRITICAL: Filter by the authenticated user ID
-    const capsules = await Capsule.find({ creatorId: req.userId }).sort({ createdAt: -1 }); 
-    res.json(capsules);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.get('/api/capsules', auth, async (req, res) => {
+    try {
+        const userId = req.userId;
+
+        // 1. Build the dynamic query based on the authenticated user ID
+        const query = {
+            $or: [
+                // RULE 1: Creator can always see their own PRIVATE/SHARED capsules
+                { creatorId: userId },
+
+                // RULE 2: Anyone (logged in) can see PUBLIC capsules
+                { privacyType: 'PUBLIC' },
+
+                // RULE 3: Users explicitly shared with (SHARED capsules)
+                {
+                    privacyType: 'SHARED',
+                    allowedUsers: { $in: [userId] } // User ID is in the allowedUsers array
+                }
+            ]
+        };
+        
+        // Find capsules that match ANY of the rules in the $or array
+        const capsules = await Capsule.find(query).sort({ createdAt: -1 });
+        
+        res.status(200).json(capsules);
+    } catch (error) {
+        console.error('Error fetching capsules:', error);
+        res.status(500).json({ message: 'Failed to fetch capsules.' });
+    }
 });
 
 // GET ONE (UNPROTECTED) - Still accessible without login, but only shows data

@@ -9,6 +9,17 @@ const CapsuleSchema = new mongoose.Schema({
   title: { type: String, required: true },
   message: { type: String, required: true },
   unlockDate: { type: Date, required: true },
+  privacyType: {
+        type: String,
+        enum: ['PRIVATE', 'PUBLIC', 'SHARED'], // Define the allowed states
+        default: 'PRIVATE',
+        required: true,
+    },
+
+  allowedUsers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // List of user IDs who can view the capsule
+  }], 
   
   // 'LOCKED' or 'UNLOCKED'
   status: { 
@@ -29,6 +40,8 @@ const CapsuleSchema = new mongoose.Schema({
   },
 
   createdAt: { type: Date, default: Date.now }
+
+    
 
   
 });
