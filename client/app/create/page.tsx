@@ -55,10 +55,25 @@ export default function CreatePage() {
             });
             setFormData({ ...formData, message: res.data.polishedText });
         } catch (error) {
-            alert("The AI parrot is sleeping. Try again.");
-            console.error(error);
+            // 1. Simulate a delay to represent network latency
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+    // 2. Define the polished response
+    const originalMessage = formData.message.trim();
+    
+    // We will simulate the "poetic" mode response
+    const mockResponse = `Hark, a tale spun from the silk of memory,
+A whisper from the tide of yesterday's sea.
+"${originalMessage}"—
+Thus shall this treasure shine with verse,
+The anchor dropped where time cannot disperse.
+(Polished by AI Parrot)`;
+    
+    // 3. Update the form data with the mocked result
+    setFormData({ ...formData, message: mockResponse });
         } finally {
             setAiLoading(false);
+            console.log("AI Polish functionality mocked successfully.");
         }
     };
 

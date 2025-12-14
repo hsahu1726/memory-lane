@@ -1,4 +1,6 @@
 require("dotenv").config();
+const { GoogleGenAI } = require('@google/genai');
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -179,12 +181,12 @@ app.post("/api/capsules", auth, upload.single("file"), async (req, res) => { // 
 
 // ---------------- AI ROUTE (Gemini) ----------------
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 
 app.post("/api/ai-polish", async (req, res) => {
   const { text, mode } = req.body;
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
     
     let prompt = "";
     if (mode === "pirate") prompt = `Rewrite this as a 17th century pirate: "${text}"`;
