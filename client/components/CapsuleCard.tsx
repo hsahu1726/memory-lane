@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaSkull, FaGem, FaHourglassHalf, FaLock, FaUsers, FaImage } from "react-icons/fa";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/config";
+
 
 interface CapsuleProps {
   _id: string;
@@ -100,7 +102,7 @@ export default function CapsuleCard({ capsule }: { capsule: CapsuleProps }) {
           <div className="w-full h-32 mb-4 rounded-lg overflow-hidden border border-amber-500/30 relative group">
               {/* Note: Ensure your server runs on localhost:5000 */}
               <img 
-                src={`http://localhost:5000${capsule.image}`} 
+                src={`${API_BASE_URL}${capsule.image}`} 
                 alt="Memory" 
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110"
               />

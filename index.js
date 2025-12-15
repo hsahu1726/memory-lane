@@ -1,4 +1,6 @@
 require("dotenv").config();
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+
 let genAIClient;
 async function initGenAI() {
   const { GoogleGenAI } = await import("@google/genai");
@@ -266,7 +268,7 @@ cron.schedule("* * * * *", async () => {
             <h1>The time has come, Matey!</h1>
             <p>A memory buried for you has just surfaced.</p>
             <p><strong>Message:</strong> "${cap.message.substring(0, 50)}..."</p>
-            <a href="http://localhost:3000/view/${cap._id}" style="padding: 10px 20px; background: #d97706; color: white; text-decoration: none; border-radius: 5px;">
+            <a href="${process.env.FRONTEND_URL}/view/${cap._id}" style="padding: 10px 20px; background: #d97706; color: white; text-decoration: none; border-radius: 5px;">
               Claim Treasure
             </a>
           `,

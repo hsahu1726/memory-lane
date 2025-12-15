@@ -5,6 +5,7 @@ import Link from "next/link";
 import axios from "axios";
 import { FaSkullCrossbones, FaMapMarkedAlt, FaSearch, FaGithub, FaSignInAlt, FaSignOutAlt, FaUserPlus, FaAnchor } from "react-icons/fa";
 import { useRouter } from "next/navigation"; // Import useRouter
+import { API_BASE_URL } from "@/lib/config";
 
 const THEMES = [
   "All Themes", // New option for no filter
@@ -42,7 +43,7 @@ export default function Home() {
             }
 
             try {
-                const res = await axios.get("http://localhost:5000/api/capsules", {
+                const res = await axios.get(`${API_BASE_URL}/api/capsules`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 setCapsules(res.data);

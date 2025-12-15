@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { FaArrowLeft, FaAnchor, FaMagic, FaCloudUploadAlt, FaLock, FaGlobe, FaShareAlt } from "react-icons/fa";
+import { API_BASE_URL } from "@/lib/config";
+
 
 // Define the structure for the form data
 interface FormData {
@@ -49,7 +51,7 @@ export default function CreatePage() {
         if (!formData.message) return alert("Write something first, Captain!");
         setAiLoading(true);
         try {
-            const res = await axios.post("http://localhost:5000/api/ai-polish", {
+            const res = await axios.post(`${API_BASE_URL}/api/ai-polish`, {
                 text: formData.message,
                 mode: "poetic" // Using poetic tone
             });
@@ -115,7 +117,7 @@ The anchor dropped where time cannot disperse.
 
         // 4. API Call
         try {
-            await axios.post("http://localhost:5000/api/capsules", data, {
+            await axios.post(`${API_BASE_URL}/api/capsules`, data, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                     "Authorization": `Bearer ${token}`

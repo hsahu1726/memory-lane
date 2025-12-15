@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaUserPlus, FaAnchor, FaEnvelope, FaLock, FaUserCircle } from "react-icons/fa"; // Added FaUserCircle for the name input
 import axios from "axios";
+import { API_BASE_URL } from "@/lib/config";
+
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -16,6 +18,7 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
+
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -23,7 +26,7 @@ export default function RegisterPage() {
 
         try {
             // UPDATED: Pass the 'name' state to the backend
-            const res = await axios.post("http://localhost:5000/api/register", {
+            const res = await axios.post(`${API_BASE_URL}/api/register`, {
                 name, // CRITICAL: Send the user's name
                 email,
                 password,
