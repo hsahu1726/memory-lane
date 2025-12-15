@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { FaUserPlus, FaAnchor, FaEnvelope, FaLock, FaUserCircle } from "react-icons/fa"; // Added FaUserCircle for the name input
 import axios from "axios";
 import { API_BASE_URL } from "@/lib/config";
+console.log("API URL:", API_BASE_URL);
+
 
 
 export default function RegisterPage() {
