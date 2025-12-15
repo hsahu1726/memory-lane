@@ -104,11 +104,19 @@ app.post('/api/register', async (req, res) => {
         
         res.status(201).json({ message: 'User registered successfully.' });
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'Email already in use.' });
-        }
-        res.status(500).json({ message: 'Server error during registration.' });
+    console.error("REGISTER ERROR:", error); // 👈 ADD THIS
+
+    if (error.code === 11000) {
+        return res.status(400).json({ message: 'Email already in use.' });
     }
+
+    res.status(500).json({
+        message: 'Server error during registration.',
+        error: error.message, // 👈 TEMPORARY
+    });
+}
+
+    
 });
 
 // --- LOGIN ---
