@@ -6,21 +6,12 @@ import Link from "next/link";
 import axios from "axios";
 import {
   FaArrowLeft,
-  FaGem,
-  FaScroll,
-  FaQuoteRight,
-  FaImage,
-  FaUsers,
-  FaCalendarAlt,
-  FaVideo,
-  FaMusic,
   FaLock,
   FaCommentAlt,
   FaPaperPlane,
   FaAnchor,
 } from "react-icons/fa";
 
-// ------------------ TYPES ------------------
 interface CapsuleData {
   _id: string;
   title: string;
@@ -29,7 +20,6 @@ interface CapsuleData {
   unlockDate: string;
   status: "LOCKED" | "UNLOCKED";
   theme: string;
-  eventType: string;
   contributors: string;
   createdAt: string;
   recipientEmail?: string;
@@ -43,14 +33,12 @@ interface CommentData {
   createdAt: string;
 }
 
-// ------------------ COMPONENT ------------------
 export default function ViewMemory() {
   const { id } = useParams();
   const router = useRouter();
 
   const [capsule, setCapsule] = useState<CapsuleData | null>(null);
-  const [loading, setLoading] = useState(true); // 🔑 FIXED
-
+  const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState<CommentData[]>([]);
   const [newCommentContent, setNewCommentContent] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
@@ -60,7 +48,6 @@ export default function ViewMemory() {
   const isVideo = (path?: string) => path?.match(/\.(mp4|webm|ogg|mov)$/i);
   const isAudio = (path?: string) => path?.match(/\.(mp3|wav|ogg)$/i);
 
-  // ------------------ FETCH CAPSULE + COMMENTS ------------------
   useEffect(() => {
     if (!id) return;
 
@@ -68,65 +55,47 @@ export default function ViewMemory() {
       try {
         const res = await axios.get(`${API}/api/capsules/${capsuleId}/comments`);
         setComments(res.data);
-      } catch (err) {
-        console.error("Error fetching comments:", err);
-      }
+      } catch {}
     };
 
     const fetchCapsule = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-
+        const token = localStorage.getItem("token");
         if (!token) {
           router.replace("/login");
           return;
         }
 
         const res = await axios.get(`${API}/api/capsules/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        let fetchedCapsule: CapsuleData = res.data;
-
-        // ⏱️ Client-side unlock (UX only)
-        const unlockTime = new Date(fetchedCapsule.unlockDate).getTime();
-        const now = Date.now();
-
-        if (fetchedCapsule.status === "LOCKED" && now >= unlockTime) {
-          fetchedCapsule = { ...fetchedCapsule, status: "UNLOCKED" };
-        }
-
+        const fetchedCapsule: CapsuleData = res.data;
         setCapsule(fetchedCapsule);
 
         if (fetchedCapsule.status === "UNLOCKED") {
           fetchComments(fetchedCapsule._id);
         }
-      } catch (err) {
-        console.error("Error fetching capsule:", err);
+      } catch {
       } finally {
-        setLoading(false); // 🔑 NEVER get stuck again
+        setLoading(false);
       }
     };
 
     fetchCapsule();
   }, [id, router, API]);
 
-  // ------------------ COMMENT SUBMIT ------------------
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("authToken");
-    const creatorName = localStorage.getItem("userName");
+    const token = localStorage.getItem("token");
+    const userRaw = localStorage.getItem("user");
+    const creatorName = userRaw ? JSON.parse(userRaw).name : null;
 
-    if (!token || !creatorName) {
-      alert("You must be logged in to comment.");
+    if (!token || !creatorName || !capsule) {
       router.push("/login");
       return;
     }
-
-    if (!capsule) return;
 
     setCommentLoading(true);
 
@@ -139,63 +108,44 @@ export default function ViewMemory() {
 
       setComments((prev) => [...prev, res.data]);
       setNewCommentContent("");
-    } catch (err) {
-      console.error("Comment post failed:", err);
-      alert("The message got lost at sea ☠️");
     } finally {
       setCommentLoading(false);
     }
   };
 
-  // ------------------ STATES ------------------
   if (loading) {
     return (
-      <div className="min-h-screen bg-black/90 flex items-center justify-center text-amber-500 animate-pulse font-serif tracking-widest">
+      <div className="min-h-screen bg-black flex items-center justify-center text-amber-500 font-serif tracking-widest">
         DIGGING UP TREASURE...
       </div>
     );
   }
 
   if (!capsule) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">
-        Treasure not found ☠️
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center">Not found</div>;
   }
 
   if (capsule.status === "LOCKED" && new Date(capsule.unlockDate).getTime() > Date.now()) {
     return (
-      <div className="min-h-screen bg-black/90 flex items-center justify-center text-gray-500 font-serif">
-        <div className="text-center p-10 bg-[#0d1117] rounded-lg border border-gray-800 shadow-xl">
-          <FaLock className="text-6xl mx-auto mb-4 text-gray-700" />
-          <h1 className="text-2xl font-bold">This Treasure is Still Locked</h1>
-          <p className="mt-2 text-sm">
-            It will open on <strong>{new Date(capsule.unlockDate).toLocaleString()}</strong>
-          </p>
-          <Link href="/" className="mt-6 inline-flex items-center gap-2 text-amber-500 hover:underline">
-            <FaArrowLeft /> Return to Map
-          </Link>
+      <div className="min-h-screen bg-black flex items-center justify-center text-gray-500">
+        <div className="text-center p-8 border border-gray-800">
+          <FaLock className="mx-auto mb-4" />
+          <p>Locked until {new Date(capsule.unlockDate).toLocaleString()}</p>
+          <Link href="/" className="block mt-4 underline">Return</Link>
         </div>
       </div>
     );
   }
 
-  // ------------------ MAIN VIEW ------------------
   return (
-    <div className="min-h-screen bg-black/70 backdrop-blur-sm text-amber-100 p-6 flex justify-center items-center font-serif">
-      <div className="max-w-4xl w-full bg-[#161b22]/95 p-12 rounded-lg border border-amber-600/30 shadow-[0_0_50px_rgba(217,119,6,0.15)] relative">
-        <Link href="/" className="absolute top-8 left-8 text-gray-500 hover:text-amber-500 flex items-center gap-2 text-xs">
-          <FaArrowLeft /> Return to Map
+    <div className="min-h-screen bg-black text-amber-100 p-6 flex justify-center items-center font-serif">
+      <div className="max-w-4xl w-full p-10 border border-amber-600/30 relative">
+        <Link href="/" className="absolute top-6 left-6 text-xs underline">
+          <FaArrowLeft /> Back
         </Link>
 
-        <div className="mt-8 mb-10 text-center">
-          <h1 className="text-4xl font-bold text-amber-400 uppercase tracking-widest">
-            {capsule.title}
-          </h1>
-        </div>
-
-        <p className="text-lg italic text-center mb-10">"{capsule.message}"</p>
+        <h1 className="text-4xl text-center mb-8 uppercase tracking-widest">{capsule.title}</h1>
+        <p className="text-lg italic text-center mb-8">"{capsule.message}"</p>
 
         {capsule.image && (
           <div className="mb-10">
@@ -204,13 +154,13 @@ export default function ViewMemory() {
             ) : isAudio(capsule.image) ? (
               <audio controls className="w-full" src={`${API}${capsule.image}`} />
             ) : (
-              <img src={`${API}${capsule.image}`} alt="Memory" className="w-full rounded" />
+              <img src={`${API}${capsule.image}`} alt="Memory" className="w-full" />
             )}
           </div>
         )}
 
-        <div className="mt-12">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <div className="mt-10">
+          <h3 className="text-xl mb-4 flex items-center gap-2">
             <FaCommentAlt /> Reflections ({comments.length})
           </h3>
 
@@ -219,19 +169,16 @@ export default function ViewMemory() {
               value={newCommentContent}
               onChange={(e) => setNewCommentContent(e.target.value)}
               required
-              className="w-full bg-[#0d1117] border border-gray-700 p-3 rounded"
+              className="w-full bg-black border border-gray-700 p-3"
             />
-            <button
-              disabled={commentLoading}
-              className="mt-2 px-4 py-2 bg-amber-700 rounded disabled:opacity-50"
-            >
-              <FaPaperPlane /> {commentLoading ? "Sending..." : "Post"}
+            <button disabled={commentLoading} className="mt-2 px-4 py-2 border">
+              <FaPaperPlane /> {commentLoading ? "Sending" : "Post"}
             </button>
           </form>
 
           {comments.map((c) => (
-            <div key={c._id} className="border border-gray-800 p-4 rounded mb-2">
-              <p className="text-amber-500 text-sm flex items-center gap-2">
+            <div key={c._id} className="border border-gray-800 p-4 mb-2">
+              <p className="text-sm flex items-center gap-2">
                 <FaAnchor /> {c.creatorName}
               </p>
               <p>{c.content}</p>
