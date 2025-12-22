@@ -60,7 +60,7 @@ export default function ViewMemory() {
 
     const fetchCapsule = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("authToken"); // ✅ FIXED
         if (!token) {
           router.replace("/login");
           return;
@@ -77,6 +77,7 @@ export default function ViewMemory() {
           fetchComments(fetchedCapsule._id);
         }
       } catch {
+        router.replace("/login");
       } finally {
         setLoading(false);
       }
@@ -88,7 +89,7 @@ export default function ViewMemory() {
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken"); // ✅ FIXED
     const userRaw = localStorage.getItem("user");
     const creatorName = userRaw ? JSON.parse(userRaw).name : null;
 
