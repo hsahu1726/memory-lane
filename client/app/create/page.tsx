@@ -112,7 +112,6 @@ The anchor dropped where time cannot disperse.`;
     try {
       await axios.post(`${API_BASE_URL}/api/capsules`, data, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
