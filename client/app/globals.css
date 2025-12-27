@@ -2,37 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Root variables ONLY for text/colors, not background */
 :root {
-  --background: #ffffff;
   --foreground: #171717;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark mode: text only */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
 
 body {
-  /* The path must start with a forward slash */
-  background-image: url('/background.jpeg');
-  
-  /* Fallback color: If you see RED, the image link is broken */
+  /*  YOUR BACKGROUND IMAGE */
+  background-image: url("/background.jpeg");
+
+  /* Fallback to confirm loading (won’t be visible if image loads) */
   background-color: darkred;
 
-  /* Locking the image in place */
+  /* Proper full-screen behavior */
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
   background-repeat: no-repeat;
-  
-  color: #fff;
+  background-attachment: fixed;
+
+  color: var(--foreground);
 }
