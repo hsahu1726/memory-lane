@@ -53,14 +53,16 @@ export default function ViewMemory() {
 
     const fetchComments = async (capsuleId: string) => {
       try {
-        const res = await axios.get(`${API}/api/capsules/${capsuleId}/comments`);
+        const res = await axios.get(
+          `${API}/api/capsules/${capsuleId}/comments`
+        );
         setComments(res.data);
       } catch {}
     };
 
     const fetchCapsule = async () => {
       try {
-        const token = localStorage.getItem("authToken"); // ✅ FIXED
+        const token = localStorage.getItem("authToken");
         if (!token) {
           router.replace("/login");
           return;
@@ -89,11 +91,13 @@ export default function ViewMemory() {
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("authToken"); // ✅ FIXED
+    if (!capsule) return;
+
+    const token = localStorage.getItem("authToken");
     const userRaw = localStorage.getItem("user");
     const creatorName = userRaw ? JSON.parse(userRaw).name : null;
 
-    if (!token || !creatorName || !capsule) {
+    if (!token || !creatorName) {
       router.push("/login");
       return;
     }
@@ -116,37 +120,51 @@ export default function ViewMemory() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-amber-500 font-serif tracking-widest">
+      <div className="min-h-screen flex items-center justify-center text-amber-500 font-serif tracking-widest">
         DIGGING UP TREASURE...
       </div>
     );
   }
 
   if (!capsule) {
-    return <div className="min-h-screen flex items-center justify-center">Not found</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Not found
+      </div>
+    );
   }
 
-  if (capsule.status === "LOCKED" && new Date(capsule.unlockDate).getTime() > Date.now()) {
+  if (
+    capsule.status === "LOCKED" &&
+    new Date(capsule.unlockDate).getTime() > Date.now()
+  ) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-gray-500">
-        <div className="text-center p-8 border border-gray-800">
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        <div className="p-8 border border-gray-700 bg-black/70 backdrop-blur-sm text-center">
           <FaLock className="mx-auto mb-4" />
           <p>Locked until {new Date(capsule.unlockDate).toLocaleString()}</p>
-          <Link href="/" className="block mt-4 underline">Return</Link>
+          <Link href="/" className="block mt-4 underline">
+            Return
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-amber-100 p-6 flex justify-center items-center font-serif">
-      <div className="max-w-4xl w-full p-10 border border-amber-600/30 relative">
+    <div className="min-h-screen flex items-center justify-center p-6 font-serif text-amber-100">
+      <div className="max-w-4xl w-full p-10 border border-amber-600/30 bg-black/70 backdrop-blur-sm relative">
         <Link href="/" className="absolute top-6 left-6 text-xs underline">
           <FaArrowLeft /> Back
         </Link>
 
-        <h1 className="text-4xl text-center mb-8 uppercase tracking-widest">{capsule.title}</h1>
-        <p className="text-lg italic text-center mb-8">"{capsule.message}"</p>
+        <h1 className="text-4xl text-center mb-8 uppercase tracking-widest">
+          {capsule.title}
+        </h1>
+
+        <p className="text-lg italic text-center mb-8">
+          "{capsule.message}"
+        </p>
 
         {capsule.image && (
           <div className="mb-10">
@@ -155,7 +173,11 @@ export default function ViewMemory() {
             ) : isAudio(capsule.image) ? (
               <audio controls className="w-full" src={`${API}${capsule.image}`} />
             ) : (
-              <img src={`${API}${capsule.image}`} alt="Memory" className="w-full" />
+              <img
+                src={`${API}${capsule.image}`}
+                alt="Memory"
+                className="w-full"
+              />
             )}
           </div>
         )}
@@ -170,15 +192,21 @@ export default function ViewMemory() {
               value={newCommentContent}
               onChange={(e) => setNewCommentContent(e.target.value)}
               required
-              className="w-full bg-black border border-gray-700 p-3"
+              className="w-full bg-black/60 border border-gray-700 p-3"
             />
-            <button disabled={commentLoading} className="mt-2 px-4 py-2 border">
+            <button
+              disabled={commentLoading}
+              className="mt-2 px-4 py-2 border"
+            >
               <FaPaperPlane /> {commentLoading ? "Sending" : "Post"}
             </button>
           </form>
 
           {comments.map((c) => (
-            <div key={c._id} className="border border-gray-800 p-4 mb-2">
+            <div
+              key={c._id}
+              className="border border-gray-800 p-4 mb-2 bg-black/50"
+            >
               <p className="text-sm flex items-center gap-2">
                 <FaAnchor /> {c.creatorName}
               </p>
